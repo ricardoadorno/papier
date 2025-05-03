@@ -1,0 +1,25 @@
+{
+  "documents": [
+    {
+      "id": "1",
+      "title": "Getting Started with Papier",
+      "content": "Welcome to Papier, your simple document management app. This is your first document, feel free to edit or delete it.\n\nYou can create new documents by clicking the 'New Document' button in the documents list page.\n\nHappy writing!",
+      "createdAt": "2025-05-01T08:00:00.000Z",
+      "updatedAt": "2025-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "title": "Project Ideas",
+      "content": "## App Features\n\n- Document organization with folders\n- Rich text editor\n- Dark/light theme toggle\n- Document sharing\n- Export to PDF\n\n## Tech Stack\n\n- React with TypeScript\n- TanStack Query for data fetching\n- Shadcn UI components\n- Vite for development\n- Lorem Ipson",
+      "createdAt": "2025-05-02T10:15:00.000Z",
+      "updatedAt": "2025-05-02T14:30:00.000Z"
+    },
+    {
+      "id": "3",
+      "title": "Meeting Notes",
+      "content": "# Team Meeting - May 2, 2025\n\n## Participants\n- Alice\n- Bob\n- Charlie\n- Diana\n\n## Discussion Points\n1. Project timeline review\n2. Feature prioritization\n3. Resource allocation\n\n## Action Items\n- Alice: Prepare design mockups\n- Bob: Set up CI/CD pipeline\n- Charlie: Research authentication options\n- Diana: Create documentation structure",
+      "createdAt": "2025-05-02T15:00:00.000Z",
+      "updatedAt": "2025-05-02T16:45:00.000Z"
+    }
+  ]
+}
