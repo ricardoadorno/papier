@@ -21,8 +21,8 @@ show_help() {
 }
 
 # Default values
-ENVIRONMENT="development"
-DOMAIN="ricardoadorni.com"
+ENVIRONMENT="production"
+DOMAIN="ricardoadorno.com"
 EMAIL="ricardo.castrorc1998@gmail.com"
 
 # Parse command-line arguments
@@ -124,7 +124,7 @@ fi
 # Deploy with Docker Compose
 echo -e "${GREEN}Deploying Papier application in $ENVIRONMENT mode...${NC}"
 docker-compose down
-docker-compose build --no-cache
+docker-compose build
 docker-compose up -d
 
 echo -e "${GREEN}Deployment completed successfully!${NC}"
