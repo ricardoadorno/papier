@@ -69,6 +69,23 @@ services:
       - ./ssl:/etc/nginx/ssl
     networks:
       - papier-network
+    # Add HTTPS certificate setup for development and production
+    command: >
+      sh -c "
+        if [ ! -f /etc/nginx/ssl/cert.pem ] || [ ! -f /etc/nginx/ssl/key.pem ]; then
+          echo 'SSL certificates not found, generating self-signed certificates for development...'
+          mkdir -p /etc/nginx/ssl
+          openssl genrsa -out /etc/nginx/ssl/key.pem 2048
+          openssl req -new -key /etc/nginx/ssl/key.pem -out /etc/nginx/ssl/csr.pem -subj '/CN=localhost/O=Papier/C=US'
+          openssl x509 -req -days 365 -in /etc/nginx/ssl/csr.pem -signkey /etc/nginx/ssl/key.pem -out /etc/nginx/ssl/cert.pem
+          rm /etc/nginx/ssl/csr.pem
+          echo 'Self-signed certificates generated successfully!'
+        else
+          echo 'Using existing SSL certificates'
+        fi
+        echo 'Starting Nginx...'
+        nginx -g 'daemon off;'
+      "
 
 networks:
   papier-network:
