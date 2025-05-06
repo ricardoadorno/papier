@@ -20,9 +20,19 @@ show_help() {
   echo -e "  --help                           Show this help message"
 }
 
+# Function to create self-signed certificates
+create_self_signed_certs() {
+  echo -e "${YELLOW}Creating initial self-signed certificates...${NC}"
+  mkdir -p ./ssl
+  openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout ./ssl/key.pem -out ./ssl/cert.pem \
+    -subj "/CN=$DOMAIN" -addext "subjectAltName=DNS:$DOMAIN"
+  chmod 644 ./ssl/cert.pem ./ssl/key.pem
+}
+
 # Default values
 ENVIRONMENT="production"
-DOMAIN="ricardoadorno.com"
+DOMAIN="app.ricardoadorno.com"
 EMAIL="ricardo.castrorc1998@gmail.com"
 
 # Parse command-line arguments
@@ -87,6 +97,11 @@ fi
 # Create required directories
 mkdir -p ssl certbot-webroot certbot
 
+# Create initial self-signed certificates so Nginx can start
+if [ ! -f ./ssl/cert.pem ] || [ ! -f ./ssl/key.pem ]; then
+  create_self_signed_certs
+fi
+
 # Function to set up SSL certificates
 setup_ssl() {
   if [ "$ENVIRONMENT" = "development" ]; then
@@ -131,17 +146,21 @@ setup_ssl() {
       -d "$DOMAIN"
     
     # Check if certificates were successfully obtained
+    echo -e "${YELLOW}Looking for certificates in ./certbot/live/$DOMAIN...${NC}"
+    ls -la ./certbot/live/ || echo "Cannot list directory contents"
+
     if [ ! -d "./certbot/live/$DOMAIN" ]; then
-      echo -e "${RED}Error: Failed to obtain certificates. Check your domain and DNS settings.${NC}"
+      echo -e "${RED}Error: Failed to obtain certificates. Path ./certbot/live/$DOMAIN not found.${NC}"
       echo -e "${YELLOW}Continuing with deployment using self-signed certificates...${NC}"
+      create_self_signed_certs
     else
       echo -e "${GREEN}Successfully obtained Let's Encrypt certificates!${NC}"
       
       # Copy certificates to the SSL directory for Nginx
       echo -e "${YELLOW}Copying certificates to SSL directory...${NC}"
       mkdir -p ./ssl
-      cp "./certbot/live/$DOMAIN/fullchain.pem" ./ssl/cert.pem
-      cp "./certbot/live/$DOMAIN/privkey.pem" ./ssl/key.pem
+      cp "./certbot/live/$DOMAIN/fullchain.pem" ./ssl/cert.pem || echo -e "${RED}Error copying fullchain.pem${NC}"
+      cp "./certbot/live/$DOMAIN/privkey.pem" ./ssl/key.pem || echo -e "${RED}Error copying privkey.pem${NC}"
       chmod 644 ./ssl/cert.pem ./ssl/key.pem
     fi
   fi
