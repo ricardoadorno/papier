@@ -10,6 +10,9 @@ import { HttpAdapterHost } from "@nestjs/core";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Set global prefix for all routes
+  app.setGlobalPrefix("api");
+
   // Enable CORS
   app.enableCors({
     origin: process.env.CORS_ORIGIN ?? "*", // Allow all origins by default

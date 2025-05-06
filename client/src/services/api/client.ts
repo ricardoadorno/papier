@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-// Define base API URL - make it configurable through environment variables in real app
-export const API_URL = 'http://localhost:3000';
+// In production with Nginx, API requests will be proxied through /api
+// For development, we can still use a direct connection to the backend
+const isProduction = import.meta.env.PROD;
+export const API_URL = isProduction ? '/api' : 'http://localhost:3000';
 
 // Create axios instance with default config
 const apiClient = axios.create({
