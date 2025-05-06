@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { EditorToolbar } from './editor-toolbar';
 import { MarkdownRenderer } from './markdown-renderer';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,7 +10,6 @@ interface MarkdownEditorProps {
 }
 
 export function MarkdownEditor({ content, onChange, className = '' }: MarkdownEditorProps) {
-    const [currentSelection, setCurrentSelection] = useState<{ start: number; end: number } | null>(null);
     const [editorRef, setEditorRef] = useState<HTMLTextAreaElement | null>(null);
 
     const handleToolbarAction = useCallback((actionType: string, payload?: any) => {
@@ -100,15 +99,6 @@ export function MarkdownEditor({ content, onChange, className = '' }: MarkdownEd
         }, 0);
     }, [content, editorRef, onChange]);
 
-    const handleSelectionChange = () => {
-        if (editorRef) {
-            setCurrentSelection({
-                start: editorRef.selectionStart,
-                end: editorRef.selectionEnd
-            });
-        }
-    };
-
     return (
         <div className={`flex flex-col border rounded-md ${className}`}>
             <EditorToolbar onActionClick={handleToolbarAction} />
@@ -119,9 +109,6 @@ export function MarkdownEditor({ content, onChange, className = '' }: MarkdownEd
                         ref={setEditorRef}
                         value={content}
                         onChange={(e) => onChange(e.target.value)}
-                        onSelect={handleSelectionChange}
-                        onKeyUp={handleSelectionChange}
-                        onMouseUp={handleSelectionChange}
                         className="w-full h-full min-h-[300px] resize-none focus:outline-none"
                         placeholder="Write your markdown here..."
                     />
