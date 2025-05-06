@@ -1,23 +1,28 @@
 version: '3.8'
 
+# For improved security:
+# 1. Create a .env file in the same directory as this docker-compose.yml
+# 2. Add required environment variables to it (POSTGRES_PASSWORD, POSTGRES_USER, etc.)
+# 3. Add .env to your .gitignore file to ensure it's not committed to source control
+
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:16
-    container_name: papier-postgres
+    image: postgres:${POSTGRES_VERSION:-16}
+    container_name: ${COMPOSE_PROJECT_NAME:-papier}-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: papier
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-papier123}
-      POSTGRES_DB: papier
+      POSTGRES_USER: ${POSTGRES_USER:-papier}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Database password is required}
+      POSTGRES_DB: ${POSTGRES_DB:-papier}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - papier-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U papier"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-papier}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -27,15 +32,16 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
-    container_name: papier-server
+    container_name: ${COMPOSE_PROJECT_NAME:-papier}-server
     restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://papier:${POSTGRES_PASSWORD:-papier123}@postgres:5432/papier
-      - PORT=3000
+      - NODE_ENV=${NODE_ENV:-production}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-papier}:${POSTGRES_PASSWORD:?Database password is required}@postgres:5432/${POSTGRES_DB:-papier}
+      - PORT=${SERVER_PORT:-3000}
+      - API_KEY=${API_KEY:-}
     networks:
       - papier-network
     command: >
@@ -51,10 +57,10 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
-    container_name: papier-client
+    container_name: ${COMPOSE_PROJECT_NAME:-papier}-client
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "${CLIENT_PORT:-80}:80"
     depends_on:
       - server
     volumes:
@@ -68,3 +74,4 @@ networks:
 
 volumes:
   postgres_data:
+    name: ${COMPOSE_PROJECT_NAME:-papier}_postgres_data
