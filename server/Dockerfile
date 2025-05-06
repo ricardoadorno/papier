@@ -1,4 +1,4 @@
-FROM node:20-slim
+FROM node:20-slim as build
 
 WORKDIR /app
 
@@ -20,8 +20,26 @@ COPY . .
 # Build the application
 RUN npm run build
 
+# Production stage with minimal dependencies
+FROM node:20-slim
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm install --production
+
+# Copy prisma schema (needed for migrations)
+COPY prisma ./prisma/
+
+# Copy build artifacts from build stage
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+
 # Expose the port
-EXPOSE 3001
+EXPOSE 3000
 
 # Command to run the application
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main.js"]

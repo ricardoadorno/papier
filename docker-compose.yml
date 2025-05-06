@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: papier
-      POSTGRES_PASSWORD: papier123
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-papier123}
       POSTGRES_DB: papier
     ports:
       - "5432:5432"
@@ -16,6 +16,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - papier-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U papier"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # Backend API Server (NestJS)
   server:
@@ -25,17 +30,21 @@ services:
     container_name: papier-server
     restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://papier:papier123@postgres:5432/papier
+      - DATABASE_URL=postgresql://papier:${POSTGRES_PASSWORD:-papier123}@postgres:5432/papier
       - PORT=3000
-    # No need to expose ports as nginx will proxy
-    volumes:
-      - ./server:/app
-      - /app/node_modules
     networks:
       - papier-network
+    command: >
+      sh -c "
+        echo 'Running database migrations...' &&
+        npx prisma migrate deploy &&
+        echo 'Starting server...' &&
+        node dist/main.js
+      "
 
   # Frontend Client (React/Vite) with Nginx
   client:
