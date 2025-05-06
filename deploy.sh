@@ -105,6 +105,10 @@ setup_ssl() {
     # Uncomment HSTS header for production
     sed -i 's/# add_header Strict-Transport-Security/add_header Strict-Transport-Security/g' nginx.conf
     
+    # Create Docker network if it doesn't exist
+    echo -e "${YELLOW}Creating Docker network...${NC}"
+    docker network create papier-network || true
+    
     # Start Nginx for the HTTP challenge
     echo -e "${YELLOW}Starting Nginx to handle Let's Encrypt HTTP challenge...${NC}"
     docker-compose up -d nginx
@@ -112,12 +116,12 @@ setup_ssl() {
     # Give Nginx time to start
     sleep 5
     
-    # Run Certbot to get certificates using standalone mode (more reliable for initial issuance)
+    # Run Certbot to get certificates using webroot mode
     echo -e "${YELLOW}Obtaining Let's Encrypt certificates for $DOMAIN...${NC}"
     docker run --rm --name temp-certbot \
       -v "$PWD/certbot:/etc/letsencrypt" \
       -v "$PWD/certbot-webroot:/var/www/certbot" \
-      --network papier-network \
+      --network host \
       certbot/certbot certonly --webroot \
       --webroot-path=/var/www/certbot \
       --email "$EMAIL" \
