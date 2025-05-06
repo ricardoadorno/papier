@@ -112,13 +112,18 @@ setup_ssl() {
     # Give Nginx time to start
     sleep 5
     
-    # Run Certbot to get certificates using webroot authentication
+    # Run Certbot to get certificates using standalone mode (more reliable for initial issuance)
     echo -e "${YELLOW}Obtaining Let's Encrypt certificates for $DOMAIN...${NC}"
-    docker-compose run --rm certbot certonly --webroot \
+    docker run --rm --name temp-certbot \
+      -v "$PWD/certbot:/etc/letsencrypt" \
+      -v "$PWD/certbot-webroot:/var/www/certbot" \
+      --network papier-network \
+      certbot/certbot certonly --webroot \
       --webroot-path=/var/www/certbot \
       --email "$EMAIL" \
       --agree-tos \
       --no-eff-email \
+      --force-renewal \
       -d "$DOMAIN"
     
     # Check if certificates were successfully obtained
