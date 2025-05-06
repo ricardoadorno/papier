@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Save, ArrowLeft, Trash } from "lucide-react";
 import { useDocumentManager } from "@/services/hooks/use-document-manager";
+import { MarkdownEditor } from "@/components/document/markdown-editor";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -146,16 +147,18 @@ export default function DocumentDetailPage() {
 
             <div className="flex-1 overflow-auto p-6">
                 {isEditing ? (
-                    <textarea
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        className="w-full h-full min-h-[300px] p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    <MarkdownEditor
+                        content={content}
+                        onChange={setContent}
+                        className="h-full"
                     />
                 ) : (
-                    <div className="prose max-w-none">
-                        {content.split('\n').map((paragraph, i) => (
-                            <p key={i}>{paragraph}</p>
-                        ))}
+                    <div className="prose dark:prose-invert max-w-none">
+                        <MarkdownEditor
+                            content={content}
+                            onChange={() => { }} // Read-only in view mode
+                            className="h-full border-none"
+                        />
                     </div>
                 )}
             </div>

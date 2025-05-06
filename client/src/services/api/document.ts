@@ -28,7 +28,7 @@ const DocumentApi = {
   },
 
   update: async (id: string, document: UpdateDocumentDto): Promise<Document> => {
-    const response = await apiClient.patch<Document>(`/documents/${id}`, document);
+    const response = await apiClient.put<Document>(`/documents/${id}`, document);
     return response.data;
   },
 
