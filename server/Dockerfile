@@ -2,6 +2,9 @@ FROM node:20-slim as build
 
 WORKDIR /app
 
+# Install OpenSSL (needed for Prisma)
+RUN apt-get update -y && apt-get install -y openssl
+
 # Copy package.json and package-lock.json (or yarn.lock)
 COPY package*.json ./
 
@@ -24,6 +27,9 @@ RUN npm run build
 FROM node:20-slim
 
 WORKDIR /app
+
+# Install OpenSSL (needed for Prisma)
+RUN apt-get update -y && apt-get install -y openssl
 
 # Copy package files
 COPY package*.json ./
